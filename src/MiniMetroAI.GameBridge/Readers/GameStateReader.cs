@@ -62,6 +62,45 @@ internal static class GameStateReader
             });
         }
 
+        for (int i = 0; i < city.LineCount; i++)
+        {
+            Line line = city.GetLine(i);
+
+            if (line == null)
+                continue;
+
+            var lineSnapshot = new LineSnapshot
+            {
+                Index = line.Index,
+                TrainCount = line.TrainCount,
+                IsMothballed = line.IsMothballed
+            };
+
+            for (int j = 0; j < line.Count; j++)
+            {
+                Link link = line[j];
+
+                if (link == null)
+                    continue;
+
+                Station start = link.GetStop(0).Station;
+                Station end = link.GetStop(1).Station;
+
+                if (start == null || end == null)
+                    continue;
+
+                lineSnapshot.Links.Add(new LinkSnapshot
+                {
+                    Id = link.Id,
+                    StartStationId = start.Id,
+                    EndStationId = end.Id
+                });
+            }
+
+            state.Lines.Add(lineSnapshot);
+        }
+
+
         return state;
     }
 }

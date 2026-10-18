@@ -19,4 +19,6 @@ public class GameStateSnapshot
 
     public List<StationSnapshot> Stations { get; set; }
         = new List<StationSnapshot>();
+    public List<LineSnapshot> Lines { get; set; }
+    = new List<LineSnapshot>();
 }

@@ -33,5 +33,24 @@ internal static class StationReader
                 $"Lines={station.LineCount} | " +
                 $"Interchange={station.IsInterchange}");
         }
+
+
+        foreach (var line in state.Lines)
+        {
+            Plugin.LogSource.LogInfo(
+                $"Line {line.Index} | " +
+                $"Trains={line.TrainCount} | " +
+                $"Links={line.Links.Count} | " +
+                $"Mothballed={line.IsMothballed}");
+
+            foreach (var link in line.Links)
+            {
+                Plugin.LogSource.LogInfo(
+                    $"  Link {link.Id}: " +
+                    $"{link.StartStationId} -> " +
+                    $"{link.EndStationId}");
+            }
+        }
+
     }
 }
