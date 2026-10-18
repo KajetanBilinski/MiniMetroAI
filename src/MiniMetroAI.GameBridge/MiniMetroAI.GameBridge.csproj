@@ -1,21 +1,25 @@
-
+﻿
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net46</TargetFramework>
     <LangVersion>latest</LangVersion>
+	<MiniMetroPath Condition="'$(MiniMetroPath)' == ''">G:\Steam\steamapps\common\MiniMetro</MiniMetroPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference
-      Include="Microsoft.NETFramework.ReferenceAssemblies.net46"
-      Version="1.0.3"
-      PrivateAssets="all" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net46" Version="1.0.3" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
+	  
     <Reference Include="BepInEx">
       <HintPath>$(MiniMetroPath)\BepInEx\core\BepInEx.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
+    <Reference Include="0Harmony">
+      <HintPath>$(MiniMetroPath)\BepInEx\core\0Harmony.dll</HintPath>
       <Private>false</Private>
     </Reference>
 
@@ -28,6 +32,17 @@
       <HintPath>$(MiniMetroPath)\MiniMetro_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
+
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(MiniMetroPath)\MiniMetro_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+	  
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(MiniMetroPath)\MiniMetro_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+
   </ItemGroup>
 
 </Project>

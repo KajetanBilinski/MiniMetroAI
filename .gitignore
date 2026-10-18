@@ -16,6 +16,18 @@
 # Mono auto generated files
 mono_crash.*
 
+#
+**/bin/
+**/obj/
+.vs/
+.idea/
+*.user
+*.suo
+
+src/MiniMetroAI.GameBridge/libs/
+
+Directory.Build.local.props
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
