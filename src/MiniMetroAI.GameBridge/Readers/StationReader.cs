@@ -50,6 +50,18 @@ internal static class StationReader
                     $"{link.StartStationId} -> " +
                     $"{link.EndStationId}");
             }
+
+
+            foreach (var train in line.Trains)
+            {
+                Plugin.LogSource.LogInfo(
+                    $"  Train ID={train.Id} | " +
+                    $"Line={train.LineIndex} | " +
+                    $"Railcars={train.ActiveRailcarCount}/" +
+                    $"{train.RailcarCount} | " +
+                    $"Passengers={train.PassengerCount}");
+            }
+
         }
 
     }

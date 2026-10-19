@@ -16,9 +16,11 @@ public class GameStateSnapshot
 
     public int LineCount { get; set; }
     public int StationCount { get; set; }
+    public int TrainCount { get; set; }
 
     public List<StationSnapshot> Stations { get; set; }
         = new List<StationSnapshot>();
     public List<LineSnapshot> Lines { get; set; }
     = new List<LineSnapshot>();
+
 }

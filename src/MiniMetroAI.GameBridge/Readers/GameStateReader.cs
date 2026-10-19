@@ -98,6 +98,41 @@ internal static class GameStateReader
             }
 
             state.Lines.Add(lineSnapshot);
+
+            for (int j = 0; j < line.TrainCount; j++)
+            {
+                Train train = line.GetTrain(j);
+
+                if (train == null)
+                    continue;
+
+                var trainSnapshot = new TrainSnapshot
+                {
+                    Id = train.Id,
+                    LineIndex = line.Index,
+                    RailcarCount = train.RailcarCount
+                };
+
+                for (int k = 0; k < train.RailcarCount; k++)
+                {
+                    Railcar railcar = train.GetRailcar(k);
+
+                    if (railcar == null)
+                        continue;
+
+                    if (railcar.State == RailcarState.MOTHBALLED)
+                        continue;
+
+                    trainSnapshot.ActiveRailcarCount++;
+
+                    trainSnapshot.PassengerCount += railcar.PeepCount;
+                }
+
+                lineSnapshot.Trains.Add(trainSnapshot);
+            }
+
+            state.TrainCount += lineSnapshot.Trains.Count;
+
         }
 
 

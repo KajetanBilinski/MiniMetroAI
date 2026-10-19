@@ -13,4 +13,6 @@ public class LineSnapshot
 
     public List<LinkSnapshot> Links { get; set; }
         = new List<LinkSnapshot>();
+    public List<TrainSnapshot> Trains { get; set; }
+    = new List<TrainSnapshot>();
 }
