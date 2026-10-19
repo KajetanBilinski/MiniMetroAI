@@ -3,8 +3,10 @@ using System;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using MiniMetroAI.GameBridge.Http;
 using MiniMetroAI.GameBridge.Patches;
 using MiniMetroAI.GameBridge.Readers;
+using MiniMetroAI.GameBridge.State;
 using UnityEngine;
 
 namespace MiniMetroAI.GameBridge;
@@ -12,12 +14,13 @@ namespace MiniMetroAI.GameBridge;
 [BepInPlugin(
     "dev.minimetroai.gamebridge",
     "MiniMetroAI GameBridge",
-    "0.2.0")]
+    "0.3.0")]
 public sealed class Plugin : BaseUnityPlugin
 {
     internal static ManualLogSource LogSource { get; private set; }
 
     private Harmony _harmony;
+    private GameBridgeHttpServer _httpServer;
 
     private void Awake()
     {
@@ -30,8 +33,7 @@ public sealed class Plugin : BaseUnityPlugin
             _harmony = new Harmony(
                 "dev.minimetroai.gamebridge");
 
-            _harmony.PatchAll(
-                typeof(Plugin).Assembly);
+            _harmony.PatchAll(typeof(Plugin).Assembly);
 
             Logger.LogInfo("Harmony patches loaded.");
         }
@@ -39,21 +41,39 @@ public sealed class Plugin : BaseUnityPlugin
         {
             Logger.LogError(ex);
         }
+
+        try
+        {
+            _httpServer = new GameBridgeHttpServer();
+            _httpServer.Start();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(
+                $"Failed to start HTTP API: {ex}");
+        }
     }
 
     private void Update()
     {
+        var main = Main.Instance;
+
+        if (main == null || !main.IsInGame)
+        {
+            GameStateCache.Clear();
+        }
+
         if (!Input.GetKeyDown(KeyCode.F9))
             return;
 
-        Game game = GameUpdatePatch.CurrentGame;
+        var game = GameUpdatePatch.CurrentGame;
 
-        if (Main.Instance == null ||
-            !Main.Instance.IsInGame ||
+        if (main == null ||
+            !main.IsInGame ||
             game == null ||
             game.City == null)
         {
-            Logger.LogInfo("No active game.");
+            Logger.LogWarning("No active game.");
             return;
         }
 
@@ -62,6 +82,9 @@ public sealed class Plugin : BaseUnityPlugin
 
     private void OnDestroy()
     {
+        _httpServer?.Stop();
         _harmony?.UnpatchSelf();
+
+        GameStateCache.Clear();
     }
 }
