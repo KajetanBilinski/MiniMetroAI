@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/MiniMetroAI.GameBridge/MiniMetroAI.GameBridge.csproj" />
+    <Project Path="src/MiniMetroAI.McpServer/MiniMetroAI.McpServer.csproj" />
   </Folder>
 </Solution>
