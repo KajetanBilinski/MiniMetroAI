@@ -1,9 +1,12 @@
 ﻿
 using System;
+using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading;
+using MiniMetroAI.GameBridge.Commands;
 using MiniMetroAI.GameBridge.State;
+using Newtonsoft.Json;
 
 namespace MiniMetroAI.GameBridge.Http;
 
@@ -74,6 +77,11 @@ internal sealed class GameBridgeHttpServer
         var request = context.Request;
         string path = request.Url.AbsolutePath;
 
+        if (path == "/api/game/pause")
+        {
+            HandlePause(context);
+            return;
+        }
         if (request.HttpMethod != "GET")
         {
             SendJson(
@@ -141,4 +149,102 @@ internal sealed class GameBridgeHttpServer
 
         _listener.Close();
     }
+
+
+    private sealed class PauseRequest
+    {
+        [JsonProperty("paused")]
+        public bool? Paused { get; set; }
+    }
+
+    private static string ReadSmallJsonBody(HttpListenerRequest request)
+    {
+        using (var reader = new StreamReader(
+            request.InputStream,
+            request.ContentEncoding ?? Encoding.UTF8))
+        {
+            char[] buffer = new char[257];
+            int count = reader.ReadBlock(buffer, 0, buffer.Length);
+
+            if (count > 256)
+                return null;
+
+            return new string(buffer, 0, count);
+        }
+    }
+
+    private static void HandlePause(HttpListenerContext context)
+    {
+        var request = context.Request;
+
+        if (request.HttpMethod != "POST")
+        {
+            SendJson(context, 405,
+                "{\"error\":\"method_not_allowed\"}");
+            return;
+        }
+
+        if (!string.IsNullOrEmpty(request.Headers["Origin"]))
+        {
+            SendJson(context, 403,
+                "{\"error\":\"browser_origin_not_allowed\"}");
+            return;
+        }
+
+        if (request.ContentType == null ||
+            !request.ContentType.StartsWith(
+                "application/json",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            SendJson(context, 415,
+                "{\"error\":\"json_required\"}");
+            return;
+        }
+
+        PauseRequest payload;
+
+        try
+        {
+            string body = ReadSmallJsonBody(request);
+
+            if (body == null)
+            {
+                SendJson(context, 413,
+                    "{\"error\":\"payload_too_large\"}");
+                return;
+            }
+
+            payload = JsonConvert.DeserializeObject<PauseRequest>(body);
+        }
+        catch (JsonException)
+        {
+            SendJson(context, 400,
+                "{\"error\":\"invalid_json\"}");
+            return;
+        }
+
+        if (payload == null || !payload.Paused.HasValue)
+        {
+            SendJson(context, 400,
+                "{\"error\":\"paused_required\"}");
+            return;
+        }
+
+        var command = GameCommandQueue.EnqueuePause(
+            payload.Paused.Value);
+
+        if (!command.Completion.Task.Wait(10000))
+        {
+            command.Cancel();
+
+            SendJson(context, 504,
+                "{\"error\":\"command_timeout\"}");
+            return;
+        }
+
+        var result = command.Completion.Task.Result;
+
+        SendJson(context, result.StatusCode, result.Json);
+    }
+
 }

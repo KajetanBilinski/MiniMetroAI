@@ -3,6 +3,7 @@ using System;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using MiniMetroAI.GameBridge.Commands;
 using MiniMetroAI.GameBridge.Http;
 using MiniMetroAI.GameBridge.Patches;
 using MiniMetroAI.GameBridge.Readers;
@@ -56,6 +57,8 @@ public sealed class Plugin : BaseUnityPlugin
 
     private void Update()
     {
+        GameCommandQueue.ProcessPending();
+
         var main = Main.Instance;
 
         if (main == null || !main.IsInGame)

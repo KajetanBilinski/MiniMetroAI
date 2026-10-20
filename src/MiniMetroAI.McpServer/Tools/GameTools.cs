@@ -18,4 +18,19 @@ public static class GameTools
     {
         return client.GetGameStateAsync();
     }
+
+
+    [McpServerTool(Name = "set_game_paused")]
+    [Description(
+        "Pauses or resumes the active Mini Metro game. " +
+        "Use only when game control has been requested.")]
+    public static Task<string> SetGamePaused(
+        GameBridgeClient client,
+        [Description(
+        "True pauses the game, false resumes it.")]
+    bool paused)
+    {
+        return client.SetGamePausedAsync(paused);
+    }
+
 }
